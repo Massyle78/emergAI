@@ -133,7 +133,7 @@ uv lock                    # regenerate the lockfile
 
 ## Development Standards
 
-This project enforces strict engineering standards defined in `rules.txt`:
+This project enforces strict engineering standards defined :
 
 - **Code quality:** Max 30-line functions, max 3 parameters, cyclomatic complexity < 10
 - **Testing:** Minimum 80% coverage, 100% on critical business logic

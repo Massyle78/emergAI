@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings
+from app.routers.cds_hooks import router as cds_hooks_router
 from app.routers.health import router as health_router
 from app.routers.media import router as media_router
 from app.routers.patients import router as patients_router
@@ -105,6 +106,7 @@ def _include_routers(application: FastAPI) -> None:
     application.include_router(health_router)
     application.include_router(patients_router, prefix="/api/v1")
     application.include_router(media_router, prefix="/api/v1")
+    application.include_router(cds_hooks_router)
 
 
 app = create_app()
