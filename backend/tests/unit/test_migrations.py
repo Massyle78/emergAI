@@ -20,6 +20,7 @@ EXPECTED_FILES = [
     "005_create_vitals_readings.sql",
     "006_create_symptom_extractions.sql",
     "007_create_risk_assessments.sql",
+    "008_create_similarity_search_function.sql",
 ]
 
 

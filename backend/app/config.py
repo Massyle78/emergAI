@@ -37,10 +37,23 @@ class Settings(BaseSettings):
     # Google Gemini
     google_genai_api_key: str = Field(default="")
     gemini_model: str = Field(default="gemini-2.5-pro")
+    gemini_max_retries: int = Field(default=3, ge=0, le=10)
+    gemini_retry_wait_seconds: int = Field(default=2, ge=1, le=30)
+    gemini_temperature: float = Field(default=0.2, ge=0.0, le=2.0)
+
+    # Embeddings
+    embedding_model: str = Field(default="gemini-embedding-001")
+    embedding_dimensions: int = Field(default=768, ge=1, le=3072)
+    similarity_match_count: int = Field(default=5, ge=1, le=50)
 
     # Metriport
     metriport_api_key: str = Field(default="")
     metriport_base_url: str = Field(default="https://api.metriport.com")
+    metriport_timeout_seconds: int = Field(default=30, ge=5, le=120)
+    metriport_poll_interval_seconds: float = Field(default=2.0, ge=0.1, le=10.0)
+    metriport_max_poll_attempts: int = Field(default=30, ge=1, le=120)
+    metriport_cb_failure_threshold: int = Field(default=5, ge=1, le=20)
+    metriport_cb_cooldown_seconds: int = Field(default=60, ge=10, le=600)
 
     # Media processing
     max_video_size_mb: int = Field(default=50, ge=1)

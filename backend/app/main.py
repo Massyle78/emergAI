@@ -72,9 +72,20 @@ async def _startup(application: FastAPI, settings: Settings) -> None:
         application.state.supabase = None
         logger.warning("Supabase credentials not configured; client disabled")
 
+    if settings.metriport_api_key:
+        from app.services.metriport_service import MetriportService
+
+        application.state.metriport = MetriportService(settings)
+    else:
+        application.state.metriport = None
+        logger.warning("Metriport API key not configured; EHR service disabled")
+
 
 async def _shutdown(application: FastAPI) -> None:
     """Clean up shared resources on application shutdown."""
+    metriport = getattr(application.state, "metriport", None)
+    if metriport is not None:
+        await metriport.close()
     logger.info("Application shutting down")
 
 
