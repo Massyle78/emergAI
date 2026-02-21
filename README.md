@@ -64,7 +64,16 @@ emergAI/
 │   ├── logging_config.yaml  # Structured logging configuration
 │   ├── pyproject.toml       # Dependencies, metadata & tool config
 │   └── uv.lock              # Deterministic lockfile (uv)
-├── frontend/                # React/Tailwind intake kiosk (future)
+├── frontend/                # React/Tailwind intake kiosk
+│   ├── src/
+│   │   ├── components/      # Reusable UI & layout components
+│   │   ├── hooks/           # Custom React hooks (auth, etc.)
+│   │   ├── lib/             # Client libraries (Supabase)
+│   │   ├── pages/           # Route-level page components
+│   │   └── types/           # Shared TypeScript types
+│   ├── public/              # Static assets
+│   ├── package.json         # Dependencies & scripts
+│   └── vite.config.ts       # Vite + Tailwind config
 ├── .env.example             # Environment variable template
 ├── .gitignore
 ├── LICENSE
@@ -75,7 +84,7 @@ emergAI/
 
 - Python 3.10+
 - [uv](https://docs.astral.sh/uv/) (fast Python package manager)
-- Node.js 20+ (for frontend, in later phases)
+- Node.js 20+ and npm (for frontend)
 - A Supabase project (free tier works for development)
 - Google AI API key (Gemini 2.5 Pro access)
 - Metriport API key
@@ -115,11 +124,24 @@ cd backend
 uv run pytest
 ```
 
-### 5. Start the dev server
+### 5. Frontend setup
 
 ```bash
+cd frontend
+cp .env.example .env    # configure Supabase keys
+npm install
+```
+
+### 6. Start the dev servers
+
+```bash
+# Terminal 1 — Backend (port 8000)
 cd backend
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Terminal 2 — Frontend (port 3000, proxies /api to backend)
+cd frontend
+npm run dev
 ```
 
 ### Common uv commands
