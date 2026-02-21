@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     # Google Gemini
     google_genai_api_key: str = Field(default="")
     gemini_model: str = Field(default="gemini-2.5-pro")
+    gemini_max_retries: int = Field(default=3, ge=0, le=10)
+    gemini_retry_wait_seconds: int = Field(default=2, ge=1, le=30)
+    gemini_temperature: float = Field(default=0.2, ge=0.0, le=2.0)
 
     # Metriport
     metriport_api_key: str = Field(default="")
