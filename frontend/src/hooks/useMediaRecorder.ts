@@ -87,9 +87,9 @@ export function useMediaRecorder(
 
   const blob = useMemo(() => {
     if (status !== "stopped" || chunks.length === 0) return null;
-    const type = recorderRef.current?.mimeType ?? "video/webm";
+    const type = recorderRef.current?.mimeType || mimeType || "video/webm";
     return new Blob(chunks, { type });
-  }, [chunks, status]);
+  }, [chunks, status, mimeType]);
 
   return { status, blob, elapsed, start, stop, reset };
 }

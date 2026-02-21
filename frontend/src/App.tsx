@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Dashboard } from "@/pages/Dashboard";
 import { KioskLanding } from "@/pages/KioskLanding";
 import { NotFound } from "@/pages/NotFound";
 import { TriageCapture } from "@/pages/TriageCapture";
@@ -12,6 +13,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<KioskLanding />} />
           <Route path="triage" element={<TriageCapture />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

@@ -76,6 +76,9 @@ def _build_user(payload: dict) -> AuthenticatedUser:
     )
 
 
+_DEMO_USER_ID = UUID("00000000-0000-4000-8000-000000000000")
+
+
 async def get_current_user(
     request: Request,
     settings: Settings = Depends(_get_settings),
@@ -85,7 +88,14 @@ async def get_current_user(
     Extracts the Bearer token from the Authorization header,
     verifies it against the Supabase JWT secret, and returns
     the authenticated user identity.
+
+    In development mode with no JWT secret configured, returns
+    a demo user so the full flow can be tested locally.
     """
+    if not settings.supabase_jwt_secret or settings.supabase_jwt_secret.startswith("your-"):
+        logger.warning("Auth bypassed — demo mode (no JWT secret configured)")
+        return AuthenticatedUser(id=_DEMO_USER_ID, email="demo@emergai.dev", role="authenticated")
+
     authorization = request.headers.get("Authorization")
     token = _extract_token(authorization)
     payload = _decode_jwt(token, settings.supabase_jwt_secret)

@@ -31,19 +31,31 @@ def _sanitize_filename(filename: str | None) -> str:
 
 
 def _validate_content_type(
-    content_type: str | None, allowed_types: list[str]
+    content_type: str | None,
+    allowed_types: list[str],
+    media_type: MediaType,
 ) -> str:
-    """Verify the upload's MIME type is in the allowed list.
+    """Verify the upload's MIME type matches the expected media category.
+
+    Strips codec parameters (e.g. ``video/webm;codecs=vp8``) and
+    checks that the base type either matches the allowlist or at
+    least belongs to the correct media category (``video/*`` or
+    ``audio/*``).  Browsers use varying MIME types for MediaRecorder
+    output (``video/x-matroska``, ``audio/ogg``, etc.).
 
     Raises:
         HTTPException: 415 if the content type is not allowed.
     """
-    if not content_type or content_type not in allowed_types:
+    base_type = (content_type or "").split(";")[0].strip()
+    expected_prefix = f"{media_type.value}/"
+    if not base_type or (
+        base_type not in allowed_types and not base_type.startswith(expected_prefix)
+    ):
         raise HTTPException(
             status_code=415,
             detail=f"Unsupported media type: {content_type}",
         )
-    return content_type
+    return base_type
 
 
 def _validate_file_size(size_bytes: int, max_mb: int) -> None:
@@ -87,7 +99,7 @@ class MediaService:
         allowed_types = self._get_allowed_types(media_type)
         max_mb = self._get_max_size_mb(media_type)
 
-        content_type = _validate_content_type(upload.content_type, allowed_types)
+        content_type = _validate_content_type(upload.content_type, allowed_types, media_type)
         content = await _read_file_content(upload)
         _validate_file_size(len(content), max_mb)
 

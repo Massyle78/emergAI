@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AudioVisualizer } from "@/components/capture/AudioVisualizer";
@@ -7,9 +7,11 @@ import {
   StepIndicator,
   type CaptureStep,
 } from "@/components/capture/StepIndicator";
+import { UploadProgress } from "@/components/capture/UploadProgress";
 import { WebcamPreview } from "@/components/capture/WebcamPreview";
 import { useMediaRecorder } from "@/hooks/useMediaRecorder";
 import { useMediaStream } from "@/hooks/useMediaStream";
+import { useUpload } from "@/hooks/useUpload";
 
 const VIDEO_MAX_SECONDS = 30;
 const AUDIO_MAX_SECONDS = 60;
@@ -39,6 +41,7 @@ export function TriageCapture() {
 
   const videoRec = useMediaRecorder(videoStream.stream, "video/webm");
   const audioRec = useMediaRecorder(audioStream.stream, "audio/webm");
+  const upload = useUpload();
 
   const goNext = useCallback(
     (next: CaptureStep) => setStep(next),
@@ -75,9 +78,11 @@ export function TriageCapture() {
           <ReviewStep
             videoBlob={videoRec.blob}
             audioBlob={audioRec.blob}
+            upload={upload}
             onRestart={() => {
               videoRec.reset();
               audioRec.reset();
+              upload.reset();
               setStep("video");
             }}
           />
@@ -308,32 +313,54 @@ function AudioStep({ stream, recorder, onDone }: AudioStepProps) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 4: Review                                                     */
+/*  Step 4: Review & Submit                                            */
 /* ------------------------------------------------------------------ */
 interface ReviewStepProps {
   videoBlob: Blob | null;
   audioBlob: Blob | null;
+  upload: ReturnType<typeof useUpload>;
   onRestart: () => void;
 }
 
-function ReviewStep({ videoBlob, audioBlob, onRestart }: ReviewStepProps) {
+function ReviewStep({ videoBlob, audioBlob, upload, onRestart }: ReviewStepProps) {
   const navigate = useNavigate();
+  const submitting = upload.phase !== "idle";
 
-  const videoUrl = useMemo(
-    () => (videoBlob ? URL.createObjectURL(videoBlob) : null),
-    [videoBlob],
-  );
-  const audioUrl = useMemo(
-    () => (audioBlob ? URL.createObjectURL(audioBlob) : null),
-    [audioBlob],
-  );
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (videoUrl) URL.revokeObjectURL(videoUrl);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
-    };
-  }, [videoUrl, audioUrl]);
+    if (!videoBlob) return;
+    const url = URL.createObjectURL(videoBlob);
+    setVideoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [videoBlob]);
+
+  useEffect(() => {
+    if (!audioBlob) return;
+    const url = URL.createObjectURL(audioBlob);
+    setAudioUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [audioBlob]);
+
+  const handleSubmit = useCallback(() => {
+    if (videoBlob && audioBlob) {
+      void upload.submit(videoBlob, audioBlob);
+    }
+  }, [videoBlob, audioBlob, upload]);
+
+  if (submitting) {
+    return (
+      <UploadProgress
+        phase={upload.phase}
+        progress={upload.progress}
+        error={upload.error}
+        processingStatus={upload.processingStatus}
+        onRetry={() => void upload.retry()}
+        onDone={() => navigate("/")}
+      />
+    );
+  }
 
   return (
     <div className="kiosk-card space-y-6">
@@ -385,17 +412,13 @@ function ReviewStep({ videoBlob, audioBlob, onRestart }: ReviewStepProps) {
           Start Over
         </button>
         <button
-          onClick={() => navigate("/")}
-          disabled={!videoBlob && !audioBlob}
+          onClick={handleSubmit}
+          disabled={!videoBlob || !audioBlob}
           className="kiosk-btn-primary"
         >
           Submit for Analysis
         </button>
       </div>
-
-      <p className="text-center text-xs text-slate-400">
-        Submission will connect to the backend in the next phase.
-      </p>
     </div>
   );
 }
