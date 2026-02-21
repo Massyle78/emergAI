@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     # Metriport
     metriport_api_key: str = Field(default="")
     metriport_base_url: str = Field(default="https://api.metriport.com")
+    metriport_timeout_seconds: int = Field(default=30, ge=5, le=120)
+    metriport_poll_interval_seconds: float = Field(default=2.0, ge=0.1, le=10.0)
+    metriport_max_poll_attempts: int = Field(default=30, ge=1, le=120)
+    metriport_cb_failure_threshold: int = Field(default=5, ge=1, le=20)
+    metriport_cb_cooldown_seconds: int = Field(default=60, ge=10, le=600)
 
     # Media processing
     max_video_size_mb: int = Field(default=50, ge=1)
