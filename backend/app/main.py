@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings
 from app.routers.health import router as health_router
+from app.routers.patients import router as patients_router
 from app.utils.errors import register_error_handlers
 from app.utils.logging import setup_logging
 
@@ -90,6 +91,7 @@ def _add_cors_middleware(application: FastAPI, settings: Settings) -> None:
 def _include_routers(application: FastAPI) -> None:
     """Register all API routers on the application."""
     application.include_router(health_router)
+    application.include_router(patients_router, prefix="/api/v1")
 
 
 app = create_app()
