@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     gemini_retry_wait_seconds: int = Field(default=2, ge=1, le=30)
     gemini_temperature: float = Field(default=0.2, ge=0.0, le=2.0)
 
+    # Embeddings
+    embedding_model: str = Field(default="gemini-embedding-001")
+    embedding_dimensions: int = Field(default=768, ge=1, le=3072)
+    similarity_match_count: int = Field(default=5, ge=1, le=50)
+
     # Metriport
     metriport_api_key: str = Field(default="")
     metriport_base_url: str = Field(default="https://api.metriport.com")
