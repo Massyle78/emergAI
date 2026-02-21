@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     allowed_audio_types: str = Field(default="audio/webm,audio/wav,audio/mp3")
     temp_media_dir: str = Field(default="./tmp/media")
 
+    # open-rppg
+    rppg_model_name: str = Field(default="FacePhys.rlap")
+    min_signal_quality: float = Field(default=0.3, ge=0.0, le=1.0)
+
     @property
     def cors_origins(self) -> list[str]:
         """Parse comma-separated allowed origins into a list."""
